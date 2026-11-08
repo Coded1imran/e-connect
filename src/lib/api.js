@@ -1,4 +1,8 @@
 // API client — every request carries the auth token when present.
+// Set VITE_API_URL at build time when the API lives on another host
+// (e.g. frontend on Vercel, backend on Render). Empty = same origin.
+
+export const API_ORIGIN = import.meta.env.VITE_API_URL || '';
 
 const TOKEN_KEY = 'econnect_token';
 
@@ -19,7 +23,7 @@ async function request(path, options = {}) {
 
   let res;
   try {
-    res = await fetch(path, { ...options, headers });
+    res = await fetch(`${API_ORIGIN}${path}`, { ...options, headers });
   } catch {
     throw new Error('Cannot reach the E-Connect server. Ask the host to start it.');
   }
@@ -45,7 +49,7 @@ export const api = {
 
 // Live updates: the server pushes a "changed" ping on every data mutation.
 export function openEventStream(onChange) {
-  const es = new EventSource('/api/events');
+  const es = new EventSource(`${API_ORIGIN}/api/events`);
   es.onmessage = () => onChange();
   es.onerror = () => {
     // EventSource reconnects automatically

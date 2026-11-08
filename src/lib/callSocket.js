@@ -1,5 +1,7 @@
 // Call signaling client — one socket per user session, with reconnect.
 
+import { API_ORIGIN } from './api.js';
+
 const listeners = new Set();
 let socket = null;
 let userKey = null;
@@ -20,9 +22,11 @@ function scheduleReconnect() {
 
 function open() {
   if (!userKey || !me) return;
-  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  // Same origin by default (Vite proxies /ws in dev); when the API is hosted
+  // elsewhere (VITE_API_URL set), connect straight to that host.
+  const base = API_ORIGIN || `${location.protocol}//${location.host}`;
   try {
-    socket = new WebSocket(`${proto}://${location.host}/ws`);
+    socket = new WebSocket(`${base.replace(/^http/, 'ws')}/ws`);
   } catch {
     scheduleReconnect();
     return;

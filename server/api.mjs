@@ -91,10 +91,17 @@ export async function handleApi(req, res) {
       }
     };
     addChangeListener(onChange);
-    req.on('close', () => {
+    const onClose = () => {
       clearInterval(keepalive);
       changeListeners.delete(onChange);
-    });
+      try {
+        res.end();
+      } catch {
+        // already closed
+      }
+    };
+    res.on('close', onClose);
+    req.on('close', onClose);
     return true;
   }
 
