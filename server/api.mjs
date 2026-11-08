@@ -15,6 +15,7 @@ function addChangeListener(fn) {
 function send(res, status, payload) {
   res.writeHead(status, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify(payload));
+  return true;
 }
 
 function tokenFrom(req) {
@@ -94,11 +95,6 @@ export async function handleApi(req, res) {
     const onClose = () => {
       clearInterval(keepalive);
       changeListeners.delete(onChange);
-      try {
-        res.end();
-      } catch {
-        // already closed
-      }
     };
     res.on('close', onClose);
     req.on('close', onClose);
